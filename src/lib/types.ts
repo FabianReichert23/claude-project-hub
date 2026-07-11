@@ -6,9 +6,19 @@ export type Project = {
   updated_at: string;
 };
 
+export type Epic = {
+  id: number;
+  project_id: number;
+  name: string;
+  implemented: 0 | 1;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Requirement = {
   id: number;
   project_id: number;
+  epic_id: number | null;
   title: string;
   description: string;
   priority: "low" | "medium" | "high" | "critical";

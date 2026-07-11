@@ -27,9 +27,19 @@ CREATE TABLE IF NOT EXISTS projects (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS epics (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  implemented INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS requirements (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  epic_id INTEGER REFERENCES epics(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
   description TEXT DEFAULT '',
   priority TEXT NOT NULL DEFAULT 'medium',
@@ -74,6 +84,9 @@ const requirementColumns = db.prepare("PRAGMA table_info(requirements)").all() a
 }[];
 if (!requirementColumns.some((c) => c.name === "implemented")) {
   db.exec("ALTER TABLE requirements ADD COLUMN implemented INTEGER NOT NULL DEFAULT 0");
+}
+if (!requirementColumns.some((c) => c.name === "epic_id")) {
+  db.exec("ALTER TABLE requirements ADD COLUMN epic_id INTEGER REFERENCES epics(id) ON DELETE SET NULL");
 }
 
 export default db;

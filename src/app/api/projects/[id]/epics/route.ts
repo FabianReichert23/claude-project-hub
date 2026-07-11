@@ -1,0 +1,26 @@
+import { NextRequest, NextResponse } from "next/server";
+import db from "@/lib/db";
+
+type Params = { params: Promise<{ id: string }> };
+
+export async function GET(_req: NextRequest, { params }: Params) {
+  const { id } = await params;
+  const rows = db
+    .prepare("SELECT * FROM epics WHERE project_id = ? ORDER BY created_at ASC")
+    .all(id);
+  return NextResponse.json(rows);
+}
+
+export async function POST(req: NextRequest, { params }: Params) {
+  const { id } = await params;
+  const body = await req.json();
+  const { name, implemented = 0 } = body;
+  if (!name) return NextResponse.json({ error: "name is required" }, { status: 400 });
+
+  const result = db
+    .prepare("INSERT INTO epics (project_id, name, implemented) VALUES (?, ?, ?)")
+    .run(id, name, implemented ? 1 : 0);
+
+  const row = db.prepare("SELECT * FROM epics WHERE id = ?").get(result.lastInsertRowid);
+  return NextResponse.json(row, { status: 201 });
+}

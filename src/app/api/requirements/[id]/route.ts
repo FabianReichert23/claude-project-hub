@@ -25,10 +25,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const status = body.status ?? existing.status;
   const implemented =
     body.implemented !== undefined ? (body.implemented ? 1 : 0) : existing.implemented;
+  const epic_id = "epic_id" in body ? body.epic_id : existing.epic_id;
 
   db.prepare(
-    "UPDATE requirements SET title = ?, description = ?, priority = ?, status = ?, implemented = ?, updated_at = datetime('now') WHERE id = ?"
-  ).run(title, description, priority, status, implemented, id);
+    "UPDATE requirements SET title = ?, description = ?, priority = ?, status = ?, implemented = ?, epic_id = ?, updated_at = datetime('now') WHERE id = ?"
+  ).run(title, description, priority, status, implemented, epic_id, id);
 
   const updated = db.prepare("SELECT * FROM requirements WHERE id = ?").get(id);
   return NextResponse.json(updated);
