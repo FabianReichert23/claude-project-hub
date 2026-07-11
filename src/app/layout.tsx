@@ -36,6 +36,21 @@ export default function RootLayout({
           </div>
         </header>
         <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">{children}</main>
+        <footer className="border-t border-neutral-200 bg-white">
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4 text-sm text-neutral-500">
+            <a
+              href="https://github.com/FabianReichert23/claude-project-hub"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-neutral-900"
+            >
+              GitHub: FabianReichert23/claude-project-hub
+            </a>
+            <a href="mailto:fabian.reichert1997@gmail.com" className="hover:text-neutral-900">
+              Kontakt: fabian.reichert1997@gmail.com
+            </a>
+          </div>
+        </footer>
       </body>
     </html>
   );
