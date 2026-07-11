@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArchitectureDoc } from "@/lib/types";
 import MarkdownContent from "./MarkdownContent";
 
@@ -12,6 +12,8 @@ export default function ArchitectureTab({ projectId }: { projectId: string }) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState("");
   const [editTitle, setEditTitle] = useState("");
+  const [search, setSearch] = useState("");
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
   async function load() {
     const res = await fetch(`/api/projects/${projectId}/architecture`);
@@ -60,6 +62,33 @@ export default function ArchitectureTab({ projectId }: { projectId: string }) {
     load();
   }
 
+  function toggleExpanded(id: number) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const term = search.trim().toLowerCase();
+  const filteredDocs = useMemo(() => {
+    if (!term) return docs;
+    return docs.filter(
+      (d) => d.title.toLowerCase().includes(term) || d.content.toLowerCase().includes(term)
+    );
+  }, [docs, term]);
+
+  function isOpen(doc: ArchitectureDoc) {
+    if (editingId === doc.id) return true;
+    if (term) return true;
+    return expanded.has(doc.id);
+  }
+
+  function expandAll() {
+    setExpanded(new Set(docs.map((d) => d.id)));
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <form onSubmit={create} className="rounded-lg border border-neutral-200 bg-white p-4">
@@ -87,12 +116,38 @@ export default function ArchitectureTab({ projectId }: { projectId: string }) {
         </div>
       </form>
 
+      <div className="flex items-center gap-3">
+        <input
+          className="w-full max-w-sm rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          placeholder="Dokumente durchsuchen (Titel oder Inhalt)..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        {term && (
+          <span className="text-xs text-neutral-500">
+            {filteredDocs.length} von {docs.length} Dokumenten
+          </span>
+        )}
+        {docs.length > 0 && (
+          <button
+            type="button"
+            onClick={expandAll}
+            className="ml-auto text-xs text-neutral-500 hover:text-neutral-900"
+          >
+            Alle aufklappen
+          </button>
+        )}
+      </div>
+
       <div className="flex flex-col gap-3">
         {loading && <p className="text-sm text-neutral-500">Lade...</p>}
         {!loading && docs.length === 0 && (
           <p className="text-sm text-neutral-500">Noch keine Architektur-Dokumente.</p>
         )}
-        {docs.map((doc) => (
+        {!loading && docs.length > 0 && filteredDocs.length === 0 && (
+          <p className="text-sm text-neutral-500">Keine Dokumente gefunden.</p>
+        )}
+        {filteredDocs.map((doc) => (
           <div key={doc.id} className="rounded-lg border border-neutral-200 bg-white p-4">
             {editingId === doc.id ? (
               <div className="flex flex-col gap-3">
@@ -125,7 +180,14 @@ export default function ArchitectureTab({ projectId }: { projectId: string }) {
             ) : (
               <div>
                 <div className="flex items-start justify-between gap-3">
-                  <div className="font-medium">{doc.title}</div>
+                  <button
+                    type="button"
+                    onClick={() => toggleExpanded(doc.id)}
+                    className="flex flex-1 items-center gap-2 text-left"
+                  >
+                    <span className="text-neutral-400">{isOpen(doc) ? "▾" : "▸"}</span>
+                    <span className="font-medium">{doc.title}</span>
+                  </button>
                   <div className="flex shrink-0 gap-3 text-xs">
                     <button
                       onClick={() => startEdit(doc)}
@@ -141,12 +203,16 @@ export default function ArchitectureTab({ projectId }: { projectId: string }) {
                     </button>
                   </div>
                 </div>
-                <div className="mt-2">
-                  <MarkdownContent content={doc.content} />
-                </div>
-                <div className="mt-2 text-xs text-neutral-400">
-                  Zuletzt aktualisiert: {doc.updated_at}
-                </div>
+                {isOpen(doc) && (
+                  <>
+                    <div className="mt-2">
+                      <MarkdownContent content={doc.content} />
+                    </div>
+                    <div className="mt-2 text-xs text-neutral-400">
+                      Zuletzt aktualisiert: {doc.updated_at}
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
