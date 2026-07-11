@@ -44,6 +44,13 @@ export type ArchitectureDoc = {
   updated_at: string;
 };
 
+export type WorklogEntry = {
+  id: number;
+  project_id: number;
+  content: string;
+  created_at: string;
+};
+
 export type TestCase = {
   id: number;
   project_id: number;

@@ -6,8 +6,9 @@ import { Project } from "@/lib/types";
 import RequirementsTab from "./RequirementsTab";
 import ArchitectureTab from "./ArchitectureTab";
 import TestsTab from "./TestsTab";
+import WorklogTab from "./WorklogTab";
 
-type Tab = "requirements" | "architecture" | "tests";
+type Tab = "requirements" | "architecture" | "tests" | "worklog";
 
 export default function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -24,6 +25,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
     { key: "requirements", label: "Requirements" },
     { key: "architecture", label: "Architektur" },
     { key: "tests", label: "Tests" },
+    { key: "worklog", label: "Worklog" },
   ];
 
   return (
@@ -58,6 +60,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
         {tab === "requirements" && <RequirementsTab projectId={id} />}
         {tab === "architecture" && <ArchitectureTab projectId={id} />}
         {tab === "tests" && <TestsTab projectId={id} />}
+        {tab === "worklog" && <WorklogTab projectId={id} />}
       </div>
     </div>
   );

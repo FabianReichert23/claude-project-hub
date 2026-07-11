@@ -6,7 +6,7 @@ import { Project } from "@/lib/types";
 
 const CLAUDE_STARTER_PROMPT = `Ich nutze den "Claude Project Hub" (lokale App unter http://localhost:3000) um Requirements, Architektur-Dokumentation und Tests für dieses Projekt zu verwalten. Bitte beachte während dieser Session folgende Regeln:
 
-1. Zuerst orientieren: Rufe zu Beginn GET http://localhost:3000/api/projects/<PROJECT_ID>/summary auf, um Projektstatus, Epics, offene Requirements und vorhandene Architektur-Dokumente zu sehen, bevor du den Code durchsuchst.
+1. Zuerst orientieren: Rufe zu Beginn GET http://localhost:3000/api/projects/<PROJECT_ID>/summary auf, um Projektstatus, Epics, offene Requirements und vorhandene Architektur-Dokumente zu sehen, bevor du den Code durchsuchst. Lies außerdem den letzten Worklog-Eintrag (GET /api/projects/<PROJECT_ID>/worklog?limit=1) — dort steht, wo die letzte Session aufgehört hat.
    Falls es noch kein Projekt im Hub für dieses Repo gibt: leg eins per POST /api/projects an und nenne mir die ID.
 
 2. Bei neuen Features/Änderungen:
@@ -19,7 +19,9 @@ const CLAUDE_STARTER_PROMPT = `Ich nutze den "Claude Project Hub" (lokale App un
 
 4. Vor der Antwort "was ist schon umgesetzt?" immer zuerst im Hub nachschauen (Summary-Endpoint bzw. Requirements-Liste), nicht raten oder nur den Code lesen.
 
-5. Falls du unter Windows/Git-Bash arbeitest: curl -d "..." kann Umlaute/Sonderzeichen verstümmeln. Payload stattdessen als UTF-8-Datei schreiben und --data-binary @datei.json verwenden, oder ein kleines Node-Skript mit fetch().
+5. Am Ende der Session (oder wenn ich mich verabschiede): Schreib einen kurzen Worklog-Eintrag (POST /api/projects/<PROJECT_ID>/worklog, Feld "content", Markdown, 3-8 Zeilen): was erledigt wurde (mit Requirement-IDs), was offen blieb, empfohlener nächster Schritt, ggf. Stolpersteine. Keine Code-Diffs.
+
+6. Falls du unter Windows/Git-Bash arbeitest: curl -d "..." kann Umlaute/Sonderzeichen verstümmeln. Payload stattdessen als UTF-8-Datei schreiben und --data-binary @datei.json verwenden, oder ein kleines Node-Skript mit fetch().
 
 Projekt-ID in diesem Hub: <TRAGE HIER DIE PROJEKT-ID EIN, oder leg selbst ein neues Projekt an und nenne mir die ID>`;
 

@@ -47,6 +47,7 @@ npm run lint   # run ESLint
 - **Comment** — belongs to a requirement: free text, timestamped
 - **ArchitectureDoc** — belongs to a project: title, Markdown content (rendered; ` ```mermaid ` code blocks are additionally rendered as diagrams)
 - **TestCase** — belongs to a project, optionally linked to a requirement: title, steps, expected result, status (`pending|pass|fail|blocked`)
+- **WorklogEntry** — belongs to a project: Markdown content, timestamped, append-only (no editing). Session-handoff notes: Claude reads the latest entry at session start and writes a new one at session end, so the next session doesn't have to reconstruct context.
 
 ## REST API (for Claude or other tools)
 
@@ -71,6 +72,9 @@ All endpoints accept/return JSON.
 | GET | `/api/projects/:id/architecture` | Architecture docs of a project |
 | POST | `/api/projects/:id/architecture` | Create a doc `{ title, content? }` |
 | GET/PATCH/DELETE | `/api/architecture/:id` | Single document |
+| GET | `/api/projects/:id/worklog` | Worklog entries, newest first (`?limit=N`, default 5) |
+| POST | `/api/projects/:id/worklog` | Create a worklog entry `{ content }` (append-only, no PATCH) |
+| DELETE | `/api/worklog/:id` | Delete a worklog entry |
 | GET | `/api/projects/:id/tests` | Tests of a project |
 | POST | `/api/projects/:id/tests` | Create a test `{ title, description?, steps?, expected_result?, status?, requirement_id? }` |
 | GET/PATCH/DELETE | `/api/tests/:id` | Single test |
