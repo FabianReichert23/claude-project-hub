@@ -103,3 +103,7 @@ curl -X PATCH http://localhost:3000/api/architecture/1 \
 ```
 
 For Claude to access a running project, the dev server (`npm run dev`) needs to be running — Claude then simply calls the endpoints above over HTTP to read or update requirements, architecture, or tests.
+
+## License
+
+[MIT](./LICENSE)
