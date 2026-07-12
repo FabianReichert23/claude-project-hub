@@ -36,6 +36,8 @@ type ImportTest = {
 };
 type ImportWorklogEntry = { content: string; created_at?: string };
 
+const MAX_IMPORT_RECORDS = 5000;
+
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const project = body.project;
@@ -48,6 +50,20 @@ export async function POST(req: NextRequest) {
   const architecture: ImportArchitectureDoc[] = Array.isArray(body.architecture) ? body.architecture : [];
   const tests: ImportTest[] = Array.isArray(body.tests) ? body.tests : [];
   const worklog: ImportWorklogEntry[] = Array.isArray(body.worklog) ? body.worklog : [];
+
+  const totalRecords =
+    epics.length +
+    requirements.length +
+    requirements.reduce((sum, r) => sum + (r.comments?.length ?? 0), 0) +
+    architecture.length +
+    tests.length +
+    worklog.length;
+  if (totalRecords > MAX_IMPORT_RECORDS) {
+    return NextResponse.json(
+      { error: `import must not exceed ${MAX_IMPORT_RECORDS} total records (got ${totalRecords})` },
+      { status: 400 }
+    );
+  }
 
   if (epics.some((e) => !e.name)) {
     return NextResponse.json({ error: "every epic needs a name" }, { status: 400 });

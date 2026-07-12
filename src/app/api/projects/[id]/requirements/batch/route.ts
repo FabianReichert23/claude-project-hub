@@ -4,6 +4,8 @@ import { echoList } from "@/lib/echoResponse";
 
 type Params = { params: Promise<{ id: string }> };
 
+const MAX_BATCH_ITEMS = 500;
+
 type BatchItem = {
   title: string;
   description?: string;
@@ -21,6 +23,12 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   if (!Array.isArray(items) || items.length === 0) {
     return NextResponse.json({ error: "items must be a non-empty array" }, { status: 400 });
+  }
+  if (items.length > MAX_BATCH_ITEMS) {
+    return NextResponse.json(
+      { error: `items must not exceed ${MAX_BATCH_ITEMS} (got ${items.length})` },
+      { status: 400 }
+    );
   }
   const invalidIndex = items.findIndex((item) => !item.title);
   if (invalidIndex !== -1) {
