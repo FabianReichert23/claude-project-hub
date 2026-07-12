@@ -75,6 +75,7 @@ export default function RequirementsTab({ projectId }: { projectId: string }) {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: initial load, see Coding-Conventions "Kein optimistic UI"
     load();
     loadEpics();
     // eslint-disable-next-line react-hooks/exhaustive-deps

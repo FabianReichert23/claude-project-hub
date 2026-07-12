@@ -15,6 +15,7 @@ export default function CommentsSection({ requirementId }: { requirementId: numb
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: initial load, see Coding-Conventions "Kein optimistic UI"
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requirementId]);

@@ -44,6 +44,7 @@ export default function HomePage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: initial load, see Coding-Conventions "Kein optimistic UI"
     load();
   }, []);
 
