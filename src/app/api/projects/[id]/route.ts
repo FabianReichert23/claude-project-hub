@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
+import { echo } from "@/lib/echoResponse";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -25,8 +26,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     "UPDATE projects SET name = ?, description = ?, updated_at = datetime('now') WHERE id = ?"
   ).run(name, description, id);
 
-  const updated = db.prepare("SELECT * FROM projects WHERE id = ?").get(id);
-  return NextResponse.json(updated);
+  const updated = db.prepare("SELECT * FROM projects WHERE id = ?").get(id) as Record<
+    string,
+    unknown
+  >;
+  return echo(req, updated);
 }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
+import { echo } from "@/lib/echoResponse";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -31,6 +32,8 @@ export async function POST(req: NextRequest, { params }: Params) {
     )
     .run(id, requirement_id, title, description, steps, expected_result, status);
 
-  const row = db.prepare("SELECT * FROM tests WHERE id = ?").get(result.lastInsertRowid);
-  return NextResponse.json(row, { status: 201 });
+  const row = db
+    .prepare("SELECT * FROM tests WHERE id = ?")
+    .get(result.lastInsertRowid) as Record<string, unknown>;
+  return echo(req, row, { status: 201 });
 }

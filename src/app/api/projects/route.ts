@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
+import { echo } from "@/lib/echoResponse";
 
 export async function GET() {
   const projects = db
@@ -20,8 +21,8 @@ export async function POST(req: NextRequest) {
       .run(name, description);
     const project = db
       .prepare("SELECT * FROM projects WHERE id = ?")
-      .get(result.lastInsertRowid);
-    return NextResponse.json(project, { status: 201 });
+      .get(result.lastInsertRowid) as Record<string, unknown>;
+    return echo(req, project, { status: 201 });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 409 });
