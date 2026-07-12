@@ -27,8 +27,10 @@ function compact(obj: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 }
 
+// No pretty-print indent: for list_* results this is pure whitespace token cost
+// with no readability benefit, since the model consumes it as data, not display text.
 function jsonResult(data: unknown) {
-  return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
+  return { content: [{ type: "text" as const, text: JSON.stringify(data) }] };
 }
 
 function errorResult(err: unknown) {
