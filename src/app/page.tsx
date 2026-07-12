@@ -12,7 +12,7 @@ const CLAUDE_STARTER_PROMPT = `Ich nutze den "Claude Project Hub" (lokale App un
    Falls es noch kein Projekt im Hub für dieses Repo gibt: leg eins per POST /api/projects an und nenne mir die ID.
 
 2. Bei neuen Features/Änderungen:
-   - Lege ein Requirement an (POST /api/projects/:id/requirements, bei mehreren auf einmal POST /api/projects/:id/requirements/batch) mit einer Beschreibung, die konkret genug ist, dass du sie später als technischen Kontext wiederverwenden kannst (Umsetzungsvorschlag, betroffene Dateien, offene Design-Fragen) — nicht nur eine kurze User-Story.
+   - Lege ein Requirement an (POST /api/projects/:id/requirements, bei mehreren auf einmal POST /api/projects/:id/requirements/batch) mit einer Beschreibung, die konkret genug ist, dass du sie später als technischen Kontext wiederverwenden kannst (Umsetzungsvorschlag, betroffene Dateien, offene Design-Fragen) — nicht nur eine kurze User-Story. Beschreibung dabei kurz halten (Richtwert ~300-500 Zeichen für Kernaussage + Umsetzungsvorschlag): auf bereits dokumentiertes Wissen verweisen ("siehe Coding-Conventions, Abschnitt X") statt Standard-Patterns erneut auszuformulieren — dokumentiere Entscheidungen und Abweichungen vom Standard, nicht das Standard-Pattern selbst. Ausnahme: genuin neuartige Features, bei denen die Design-Entscheidung selbst der wertvolle Inhalt ist — dort ist Ausführlichkeit gerechtfertigt.
    - Ordne das Requirement einem passenden Epic zu, leg bei Bedarf ein neues an (POST /api/projects/:id/epics).
    - Markiere Requirements nach Fertigstellung als implemented / status "done" (PATCH /api/requirements/:id).
    - Leg für jedes fertige Feature einen Test-Case an (POST /api/projects/:id/tests), der beschreibt, wie man es manuell verifiziert.

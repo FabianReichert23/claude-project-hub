@@ -47,6 +47,8 @@ One tool per REST operation actually used in the Claude workflow (see root `CLAU
 
 Nullable foreign keys (`epic_id` on requirements, `requirement_id` on tests) follow the same convention as the REST API: omit the field to leave it unchanged, pass `null` to explicitly clear it.
 
+`create_*`/`update_*` tools return the REST API's default lean response — `{ id, created_at?, updated_at? }`, not the full object — since the caller already knows the fields it just sent. The tools don't currently expose `?echo=full`; call the REST endpoint directly (see root README) for the rare case where the full row is needed.
+
 ## Development
 
 ```bash
