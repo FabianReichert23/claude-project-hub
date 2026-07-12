@@ -27,6 +27,28 @@ const CLAUDE_STARTER_PROMPT = `Ich nutze den "Claude Project Hub" (lokale App un
 
 Projekt-ID in diesem Hub: <TRAGE HIER DIE PROJEKT-ID EIN, oder leg selbst ein neues Projekt an und nenne mir die ID>`;
 
+const SYNC_EXISTING_PROJECT_PROMPT = `Dieses Repo existiert schon, hat aber noch kein Projekt im "Claude Project Hub" (lokale App unter http://localhost:3000). Bitte hole das jetzt einmalig nach, bevor wir weiterarbeiten:
+
+0. MCP bevorzugen: Falls der MCP-Server "claude-project-hub" verbunden ist (Tool-Liste bzw. /mcp prüfen), nutze dessen Tools (list_projects, create_project, create_epic, create_requirements_batch, create_architecture_doc, create_test, add_worklog_entry, ...) statt curl. Setup falls nötig: siehe mcp/README.md im Repo. Sonst REST unter /api/* als Fallback.
+
+1. Prüfen, ob für dieses Repo bereits ein Projekt existiert (list_projects bzw. GET /api/projects, Name/Beschreibung abgleichen). Falls nicht: Projekt anlegen (create_project) mit sprechendem Namen und kurzer Beschreibung.
+
+2. Codebasis erkunden, um dir ein Bild zu machen (Package-Manifest wie package.json/pyproject.toml/go.mod, README, Verzeichnisstruktur, git log --oneline -20, vorhandene Docs/Kommentare). Ziel: Stack, Hauptfeatures, grobe Architektur verstehen — kein vollständiger Code-Review.
+
+3. Epics für die wichtigsten Feature-/Funktionsbereiche anlegen (grobe Gruppierung, meist reichen 3-8 Epics).
+
+4. Requirements für bereits umgesetzte Kernfunktionen anlegen (create_requirements_batch), jeweils mit status "done"/implemented=1 und passendem Epic. WICHTIG: kuratieren statt vollständig erfassen — die wichtigsten ~10-20 Punkte, die den Kern der App ausmachen, nicht jede einzelne Funktion. Beschreibung kurz halten (~300-500 Zeichen: was es tut + wo im Code), keine Standard-Boilerplate ausformulieren.
+
+5. Mindestens 2 Architektur-Dokumente anlegen: eins zu Repo-Struktur/Stack (welche Verzeichnisse/Dateien wofür), eins zu Coding-Conventions/wiederkehrenden Mustern, die du im Code erkennst (Namensschemata, Fehlerbehandlung, Teststrategie, ...).
+
+6. Für die 3-5 wichtigsten Kernfunktionen je einen Test-Case anlegen, der beschreibt, wie man sie manuell verifiziert (status "pending", falls nicht selbst durchgeführt).
+
+7. Abschließend einen ersten Worklog-Eintrag schreiben: was beim Onboarding erfasst wurde, was bewusst ausgelassen wurde (z.B. bei einem großen Repo), empfohlener nächster Schritt.
+
+8. Am Ende: nenne mir die neue Projekt-ID, damit ich sie in meinen normalen Session-Start-Prompt eintragen kann.
+
+Ziel ist ein brauchbarer erster Schnappschuss, keine vollständige Dokumentation — der Rest ergänzt sich von selbst über den normalen Session-Start-Prompt in künftigen Sessions.`;
+
 export default function HomePage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +58,8 @@ export default function HomePage() {
   const [importError, setImportError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [promptExpanded, setPromptExpanded] = useState(false);
+  const [syncCopied, setSyncCopied] = useState(false);
+  const [syncPromptExpanded, setSyncPromptExpanded] = useState(false);
 
   async function load() {
     const res = await fetch("/api/projects");
@@ -104,6 +128,12 @@ export default function HomePage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  async function copySyncPrompt() {
+    await navigator.clipboard.writeText(SYNC_EXISTING_PROJECT_PROMPT);
+    setSyncCopied(true);
+    setTimeout(() => setSyncCopied(false), 2000);
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <section>
@@ -147,6 +177,38 @@ export default function HomePage() {
         {promptExpanded && (
           <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap rounded-md bg-neutral-50 p-3 font-mono text-xs text-neutral-700">
             {CLAUDE_STARTER_PROMPT}
+          </pre>
+        )}
+      </section>
+
+      <section className="rounded-lg border border-neutral-200 bg-white p-5">
+        <div className="flex items-start justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => setSyncPromptExpanded((v) => !v)}
+            className="flex flex-1 items-start gap-2 text-left"
+          >
+            <span className="mt-0.5 text-neutral-400">{syncPromptExpanded ? "▾" : "▸"}</span>
+            <div>
+              <h2 className="text-sm font-medium text-neutral-700">Bestehendes Projekt synchronisieren</h2>
+              <p className="mt-1 text-sm text-neutral-600">
+                Für Repos, die noch kein Projekt im Hub haben: diesen Prompt kopieren und in Claude
+                einfügen, damit Claude die Codebasis erkundet und Requirements, Architektur-Docs, Tests
+                und einen ersten Worklog-Eintrag anlegt.
+              </p>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={copySyncPrompt}
+            className="shrink-0 rounded-md border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-50"
+          >
+            {syncCopied ? "Kopiert!" : "Kopieren"}
+          </button>
+        </div>
+        {syncPromptExpanded && (
+          <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap rounded-md bg-neutral-50 p-3 font-mono text-xs text-neutral-700">
+            {SYNC_EXISTING_PROJECT_PROMPT}
           </pre>
         )}
       </section>
