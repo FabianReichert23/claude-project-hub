@@ -1,0 +1,22 @@
+{
+  "name": "claude-project-hub-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP server exposing Claude Project Hub as typed tools instead of curl/REST",
+  "type": "module",
+  "bin": {
+    "claude-project-hub-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "typescript": "^5"
+  }
+}

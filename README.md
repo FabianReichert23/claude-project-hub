@@ -49,6 +49,10 @@ npm run lint   # run ESLint
 - **TestCase** — belongs to a project, optionally linked to a requirement: title, steps, expected result, status (`pending|pass|fail|blocked`)
 - **WorklogEntry** — belongs to a project: Markdown content, timestamped, append-only (no editing). Session-handoff notes: Claude reads the latest entry at session start and writes a new one at session end, so the next session doesn't have to reconstruct context.
 
+## MCP server (recommended for Claude Code)
+
+Instead of Claude calling the REST API via `curl`/Bash on every turn, `mcp/` contains a small [MCP](https://modelcontextprotocol.io/) server that exposes the same operations as typed tools — one-time setup, no per-call shell overhead, no Windows/curl encoding issues. See [`mcp/README.md`](./mcp/README.md) for setup (`claude mcp add ...`). The REST API below still needs to run underneath it (`npm run dev`), and remains available directly for the web UI or non-Claude tools.
+
 ## REST API (for Claude or other tools)
 
 All endpoints accept/return JSON.
