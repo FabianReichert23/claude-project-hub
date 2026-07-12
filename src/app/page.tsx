@@ -6,6 +6,8 @@ import { Project } from "@/lib/types";
 
 const CLAUDE_STARTER_PROMPT = `Ich nutze den "Claude Project Hub" (lokale App unter http://localhost:3000) um Requirements, Architektur-Dokumentation und Tests für dieses Projekt zu verwalten. Bitte beachte während dieser Session folgende Regeln:
 
+0. MCP bevorzugen: Falls der MCP-Server "claude-project-hub" in dieser Session verbunden ist (Tool-Liste bzw. /mcp prüfen), nutze direkt dessen Tools (get_project_summary, list_requirements, create_requirement(s), update_requirement, list/update_architecture_doc, create_test, add_worklog_entry, ...) statt der unten beschriebenen curl-Aufrufe — gleiche Operationen, aber ohne Bash-Overhead und ohne das Windows-Encoding-Problem aus Regel 6. Setup falls noch nicht verbunden: siehe mcp/README.md im Repo. Ist kein MCP verbunden, gelten die REST-Aufrufe unten unverändert als Fallback.
+
 1. Zuerst orientieren: Rufe zu Beginn GET http://localhost:3000/api/projects/<PROJECT_ID>/summary auf, um Projektstatus, Epics, offene Requirements und vorhandene Architektur-Dokumente zu sehen, bevor du den Code durchsuchst. Lies außerdem den letzten Worklog-Eintrag (GET /api/projects/<PROJECT_ID>/worklog?limit=1) — dort steht, wo die letzte Session aufgehört hat.
    Falls es noch kein Projekt im Hub für dieses Repo gibt: leg eins per POST /api/projects an und nenne mir die ID.
 
