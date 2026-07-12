@@ -49,6 +49,8 @@ Nullable foreign keys (`epic_id` on requirements, `requirement_id` on tests) fol
 
 `create_*`/`update_*` tools return the REST API's default lean response — `{ id, created_at?, updated_at? }`, not the full object — since the caller already knows the fields it just sent. The tools don't currently expose `?echo=full`; call the REST endpoint directly (see root README) for the rare case where the full row is needed.
 
+`list_architecture` is lean by default too (no `content` field) — pass `expand: true` to get full content (forwards to `?expand=full`). `list_requirements`/`list_tests` don't expose an equivalent `expand` param yet; use the REST endpoint directly if the full row is needed there.
+
 ## Development
 
 ```bash

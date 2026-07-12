@@ -167,9 +167,13 @@ tool(
 
 // --- Architecture docs ---
 
-tool("list_architecture", "List architecture documents of a project (includes full content).", { project_id: z.number() }, ({
-  project_id,
-}) => callApi(`/api/projects/${project_id}/architecture`));
+tool(
+  "list_architecture",
+  "List architecture documents of a project. Lean by default (no content field, titles only) — pass expand: true to get full content.",
+  { project_id: z.number(), expand: z.boolean().optional() },
+  ({ project_id, expand }) =>
+    callApi(`/api/projects/${project_id}/architecture${expand ? "?expand=full" : ""}`)
+);
 
 tool(
   "create_architecture_doc",
