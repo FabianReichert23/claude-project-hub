@@ -16,7 +16,7 @@ export default function ArchitectureTab({ projectId }: { projectId: string }) {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
   async function load() {
-    const res = await fetch(`/api/projects/${projectId}/architecture`);
+    const res = await fetch(`/api/projects/${projectId}/architecture?expand=full`);
     setDocs(await res.json());
     setLoading(false);
   }

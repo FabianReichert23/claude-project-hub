@@ -23,7 +23,7 @@ export default function TestsTab({ projectId }: { projectId: string }) {
 
   async function load() {
     const [testsRes, reqRes] = await Promise.all([
-      fetch(`/api/projects/${projectId}/tests`),
+      fetch(`/api/projects/${projectId}/tests?expand=full`),
       fetch(`/api/projects/${projectId}/requirements`),
     ]);
     setItems(await testsRes.json());

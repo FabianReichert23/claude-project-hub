@@ -64,7 +64,7 @@ export default function RequirementsTab({ projectId }: { projectId: string }) {
   const [onlyOpen, setOnlyOpen] = useState(false);
 
   async function load() {
-    const res = await fetch(`/api/projects/${projectId}/requirements`);
+    const res = await fetch(`/api/projects/${projectId}/requirements?expand=full`);
     setItems(await res.json());
     setLoading(false);
   }
@@ -253,6 +253,7 @@ export default function RequirementsTab({ projectId }: { projectId: string }) {
                 onChange={() => toggleImplemented(r)}
                 title="Als umgesetzt markieren"
               />
+              <span className="font-mono text-xs text-neutral-400">#{r.id}</span>
               <div className={`font-medium ${r.implemented ? "line-through text-neutral-400" : ""}`}>
                 {r.title}
               </div>
