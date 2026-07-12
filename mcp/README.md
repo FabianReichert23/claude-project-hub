@@ -51,6 +51,8 @@ Nullable foreign keys (`epic_id` on requirements, `requirement_id` on tests) fol
 
 `list_architecture` is lean by default too (no `content` field) — pass `expand: true` to get full content (forwards to `?expand=full`). `list_requirements`/`list_tests` don't expose an equivalent `expand` param yet; use the REST endpoint directly if the full row is needed there.
 
+`list_requirements` accepts optional `status`/`epic_id`/`type`/`implemented` filters, `list_tests` accepts optional `status`/`epic_id` (the epic of the linked requirement, joined server-side) — both filter via SQL `WHERE`/`JOIN` instead of returning the full list for client-side filtering (Req #205693).
+
 ## Development
 
 ```bash

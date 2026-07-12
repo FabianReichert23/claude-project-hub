@@ -7,9 +7,27 @@ type Params = { params: Promise<{ id: string }> };
 
 export async function GET(req: NextRequest, { params }: Params) {
   const { id } = await params;
-  const rows = db
-    .prepare("SELECT * FROM tests WHERE project_id = ? ORDER BY created_at DESC")
-    .all(id) as Record<string, unknown>[];
+  const sp = req.nextUrl.searchParams;
+  const status = sp.get("status");
+  const epicId = sp.get("epic_id");
+
+  // epic_id isn't a column on tests — it lives on the linked requirement, so
+  // filtering by it needs a join instead of a plain WHERE column match.
+  let sql = "SELECT tests.* FROM tests";
+  const conditions = ["tests.project_id = ?"];
+  const args: unknown[] = [id];
+  if (epicId !== null) {
+    sql += " JOIN requirements ON tests.requirement_id = requirements.id";
+    conditions.push("requirements.epic_id = ?");
+    args.push(epicId);
+  }
+  if (status !== null) {
+    conditions.push("tests.status = ?");
+    args.push(status);
+  }
+  sql += ` WHERE ${conditions.join(" AND ")} ORDER BY tests.created_at DESC`;
+
+  const rows = db.prepare(sql).all(...args) as Record<string, unknown>[];
   return leanList(req, rows, ["description", "steps", "expected_result"]);
 }
 

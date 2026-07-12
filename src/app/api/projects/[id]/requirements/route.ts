@@ -5,11 +5,22 @@ import { leanList } from "@/lib/leanList";
 
 type Params = { params: Promise<{ id: string }> };
 
+const FILTER_COLUMNS = ["status", "epic_id", "type", "implemented"] as const;
+
 export async function GET(req: NextRequest, { params }: Params) {
   const { id } = await params;
+  const conditions = ["project_id = ?"];
+  const args: unknown[] = [id];
+  for (const column of FILTER_COLUMNS) {
+    const value = req.nextUrl.searchParams.get(column);
+    if (value !== null) {
+      conditions.push(`${column} = ?`);
+      args.push(value);
+    }
+  }
   const rows = db
-    .prepare("SELECT * FROM requirements WHERE project_id = ? ORDER BY created_at DESC")
-    .all(id) as Record<string, unknown>[];
+    .prepare(`SELECT * FROM requirements WHERE ${conditions.join(" AND ")} ORDER BY created_at DESC`)
+    .all(...args) as Record<string, unknown>[];
   return leanList(req, rows, ["description"]);
 }
 

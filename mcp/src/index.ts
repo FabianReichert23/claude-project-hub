@@ -27,6 +27,14 @@ function compact(obj: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 }
 
+// Builds "?a=b&c=d" from defined values only, or "" if none — used for GET filter params.
+function queryString(params: Record<string, unknown>): string {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(compact(params))) search.set(key, String(value));
+  const qs = search.toString();
+  return qs ? `?${qs}` : "";
+}
+
 // No pretty-print indent: for list_* results this is pure whitespace token cost
 // with no readability benefit, since the model consumes it as data, not display text.
 function jsonResult(data: unknown) {
@@ -107,8 +115,17 @@ tool(
 
 // --- Requirements ---
 
-tool("list_requirements", "List requirements of a project.", { project_id: z.number() }, ({ project_id }) =>
-  callApi(`/api/projects/${project_id}/requirements`)
+tool(
+  "list_requirements",
+  "List requirements of a project. Optional filters (status, epic_id, type, implemented) are applied server-side to cut payload size.",
+  {
+    project_id: z.number(),
+    status: reqStatus.optional(),
+    epic_id: z.number().optional(),
+    type: reqType.optional(),
+    implemented: z.union([z.literal(0), z.literal(1)]).optional(),
+  },
+  ({ project_id, ...filters }) => callApi(`/api/projects/${project_id}/requirements${queryString(filters)}`)
 );
 
 tool(
@@ -192,8 +209,11 @@ tool(
 
 // --- Tests ---
 
-tool("list_tests", "List tests of a project.", { project_id: z.number() }, ({ project_id }) =>
-  callApi(`/api/projects/${project_id}/tests`)
+tool(
+  "list_tests",
+  "List tests of a project. Optional filters (status, epic_id — the epic of the linked requirement) are applied server-side to cut payload size.",
+  { project_id: z.number(), status: testStatus.optional(), epic_id: z.number().optional() },
+  ({ project_id, ...filters }) => callApi(`/api/projects/${project_id}/tests${queryString(filters)}`)
 );
 
 tool(
