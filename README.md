@@ -65,6 +65,10 @@ All endpoints accept/return JSON.
 
 Mutating endpoints (`POST`/`PATCH`) return a lean body by default — `{ id, created_at?, updated_at? }` (only the fields the table actually has; append-only tables like `comments`/`worklog_entries` have no `updated_at`) — instead of echoing back fields the caller just sent. Append `?echo=full` to get the complete row (or array of rows, for the batch endpoint) instead, e.g. `POST /api/projects/1/requirements?echo=full`.
 
+### Response format for GET lists
+
+List endpoints (`requirements`, `tests`, `architecture`) omit long text fields (`description`/`steps`/`expected_result`/`content`) by default — the common case is browsing an overview, not reading every entry in full. Append `?expand=full` to get the complete rows instead, e.g. `GET /api/projects/1/requirements?expand=full`. Single-item `GET` endpoints (e.g. `/api/requirements/:id`) always return the full row regardless.
+
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/api/projects` | List all projects |
@@ -90,6 +94,8 @@ Mutating endpoints (`POST`/`PATCH`) return a lean body by default — `{ id, cre
 | GET | `/api/projects/:id/tests` | Tests of a project |
 | POST | `/api/projects/:id/tests` | Create a test `{ title, description?, steps?, expected_result?, status?, requirement_id? }` |
 | GET/PATCH/DELETE | `/api/tests/:id` | Single test |
+| GET | `/api/projects/:id/export` | Full backup of a project as JSON (epics, requirements + comments, architecture docs, tests, worklog) — always returns every field, unaffected by the `?expand=full` convention above. |
+| POST | `/api/projects/import` | Re-create a project from an export (new ID, old id-based relations remapped, timestamps preserved). All-or-nothing; `409` if a project with that name already exists. |
 
 ### Examples
 
@@ -126,6 +132,15 @@ curl -X POST http://localhost:3000/api/projects/1/requirements \
 curl -X POST "http://localhost:3000/api/projects/1/requirements?echo=full" \
   -H "Content-Type: application/json" \
   -d '{"title":"Login flow","priority":"high"}'
+
+# Get a requirement list with description included instead of the default lean fields
+curl "http://localhost:3000/api/projects/1/requirements?expand=full"
+
+# Back up a project, then restore it as a new project elsewhere
+curl http://localhost:3000/api/projects/1/export > project-1-backup.json
+curl -X POST http://localhost:3000/api/projects/import \
+  -H "Content-Type: application/json" \
+  --data-binary @project-1-backup.json
 ```
 
 For Claude to access a running project, the dev server (`npm run dev`) needs to be running — Claude then simply calls the endpoints above over HTTP to read or update requirements, architecture, or tests.

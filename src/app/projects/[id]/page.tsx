@@ -21,6 +21,18 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
       .then(setProject);
   }, [id]);
 
+  async function exportProject() {
+    const res = await fetch(`/api/projects/${id}/export`);
+    const data = await res.json();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${project?.name ?? "project"}-export.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   const tabs: { key: Tab; label: string }[] = [
     { key: "requirements", label: "Requirements" },
     { key: "architecture", label: "Architektur" },
@@ -30,13 +42,25 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-900">
-          ← Alle Projekte
-        </Link>
-        <h1 className="mt-1 text-2xl font-semibold">{project?.name ?? "…"}</h1>
-        {project?.description && (
-          <p className="mt-1 text-sm text-neutral-600">{project.description}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-900">
+            ← Alle Projekte
+          </Link>
+          <h1 className="mt-1 text-2xl font-semibold">{project?.name ?? "…"}</h1>
+          {project?.description && (
+            <p className="mt-1 text-sm text-neutral-600">{project.description}</p>
+          )}
+        </div>
+        {project && (
+          <button
+            type="button"
+            onClick={exportProject}
+            className="shrink-0 rounded-md border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-50"
+            title="Komplettes Projekt als JSON exportieren (Backup)"
+          >
+            Exportieren
+          </button>
         )}
       </div>
 

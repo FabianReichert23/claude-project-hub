@@ -33,6 +33,7 @@ export default function HomePage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [promptExpanded, setPromptExpanded] = useState(false);
 
@@ -68,6 +69,31 @@ export default function HomePage() {
   async function deleteProject(id: number) {
     if (!confirm("Projekt inklusive aller Requirements/Tests/Architektur löschen?")) return;
     await fetch(`/api/projects/${id}`, { method: "DELETE" });
+    load();
+  }
+
+  async function importProject(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setImportError(null);
+    let data: unknown;
+    try {
+      data = JSON.parse(await file.text());
+    } catch {
+      setImportError("Datei ist kein gültiges JSON.");
+      return;
+    }
+    const res = await fetch("/api/projects/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      setImportError(err.error ?? "Fehler beim Import");
+      return;
+    }
     load();
   }
 
@@ -147,6 +173,14 @@ export default function HomePage() {
           </button>
         </form>
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        <div className="mt-3 flex items-center gap-2 border-t border-neutral-100 pt-3">
+          <label className="cursor-pointer rounded-md border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-50">
+            Projekt aus JSON importieren...
+            <input type="file" accept="application/json" onChange={importProject} className="hidden" />
+          </label>
+          <span className="text-xs text-neutral-500">Stellt ein per &quot;Exportieren&quot; gesichertes Projekt neu her.</span>
+        </div>
+        {importError && <p className="mt-2 text-sm text-red-600">{importError}</p>}
       </section>
 
       <section className="flex flex-col gap-3">
