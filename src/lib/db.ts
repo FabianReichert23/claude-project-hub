@@ -2,18 +2,23 @@ import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
 
-const dataDir = path.join(process.cwd(), "data");
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-
-const dbPath = path.join(dataDir, "hub.sqlite");
+const dbPath = process.env.HUB_DB_PATH ?? path.join(process.cwd(), "data", "hub.sqlite");
+if (!process.env.HUB_DB_PATH) {
+  const dataDir = path.dirname(dbPath);
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+}
 
 declare global {
   // eslint-disable-next-line no-var
   var __hubDb: Database.Database | undefined;
 }
 
-const db = global.__hubDb ?? new Database(dbPath);
-if (process.env.NODE_ENV !== "production") global.__hubDb = db;
+// Tests set HUB_DB_PATH to an isolated :memory: DB per file; skip the global-reuse
+// cache there so each test file gets its own fresh instance instead of the first
+// one created in the worker process (see vitest.config.ts).
+const isTest = process.env.NODE_ENV === "test";
+const db = (!isTest && global.__hubDb) || new Database(dbPath);
+if (process.env.NODE_ENV !== "production" && !isTest) global.__hubDb = db;
 
 db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
