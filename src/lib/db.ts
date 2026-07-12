@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS requirements (
   description TEXT DEFAULT '',
   priority TEXT NOT NULL DEFAULT 'medium',
   status TEXT NOT NULL DEFAULT 'draft',
+  type TEXT NOT NULL DEFAULT 'requirement',
   implemented INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -94,6 +95,9 @@ if (!requirementColumns.some((c) => c.name === "implemented")) {
 }
 if (!requirementColumns.some((c) => c.name === "epic_id")) {
   db.exec("ALTER TABLE requirements ADD COLUMN epic_id INTEGER REFERENCES epics(id) ON DELETE SET NULL");
+}
+if (!requirementColumns.some((c) => c.name === "type")) {
+  db.exec("ALTER TABLE requirements ADD COLUMN type TEXT NOT NULL DEFAULT 'requirement'");
 }
 
 export default db;

@@ -23,6 +23,7 @@ export type Requirement = {
   description: string;
   priority: "low" | "medium" | "high" | "critical";
   status: "draft" | "approved" | "in_progress" | "done" | "rejected";
+  type: "requirement" | "bug";
   implemented: 0 | 1;
   created_at: string;
   updated_at: string;

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
+import { echoList } from "@/lib/echoResponse";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -8,6 +9,7 @@ type BatchItem = {
   description?: string;
   priority?: string;
   status?: string;
+  type?: string;
   implemented?: number | boolean;
   epic_id?: number | null;
 };
@@ -27,9 +29,18 @@ export async function POST(req: NextRequest, { params }: Params) {
       { status: 400 }
     );
   }
+  const invalidTypeIndex = items.findIndex(
+    (item) => item.type !== undefined && item.type !== "requirement" && item.type !== "bug"
+  );
+  if (invalidTypeIndex !== -1) {
+    return NextResponse.json(
+      { error: `type must be 'requirement' or 'bug' (item index ${invalidTypeIndex})` },
+      { status: 400 }
+    );
+  }
 
   const insert = db.prepare(
-    "INSERT INTO requirements (project_id, epic_id, title, description, priority, status, implemented) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    "INSERT INTO requirements (project_id, epic_id, title, description, priority, status, type, implemented) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
   );
   const select = db.prepare("SELECT * FROM requirements WHERE id = ?");
 
@@ -42,12 +53,13 @@ export async function POST(req: NextRequest, { params }: Params) {
         item.description ?? "",
         item.priority ?? "medium",
         item.status ?? "draft",
+        item.type ?? "requirement",
         item.implemented ? 1 : 0
       );
       return select.get(result.lastInsertRowid);
     });
   });
 
-  const created = insertAll(items);
-  return NextResponse.json(created, { status: 201 });
+  const created = insertAll(items) as Record<string, unknown>[];
+  return echoList(req, created, { status: 201 });
 }

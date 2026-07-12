@@ -59,6 +59,7 @@ function tool<Args extends z.ZodRawShape>(
 
 const priority = z.enum(["low", "medium", "high", "critical"]);
 const reqStatus = z.enum(["draft", "approved", "in_progress", "done", "rejected"]);
+const reqType = z.enum(["requirement", "bug"]);
 const testStatus = z.enum(["pending", "pass", "fail", "blocked"]);
 
 // --- Projects ---
@@ -119,6 +120,7 @@ tool(
     description: z.string().optional(),
     priority: priority.optional(),
     status: reqStatus.optional(),
+    type: reqType.optional(),
     implemented: z.union([z.literal(0), z.literal(1)]).optional(),
     epic_id: z.number().optional(),
   },
@@ -131,6 +133,7 @@ const requirementItem = z.object({
   description: z.string().optional(),
   priority: priority.optional(),
   status: reqStatus.optional(),
+  type: reqType.optional(),
   implemented: z.union([z.literal(0), z.literal(1)]).optional(),
   epic_id: z.number().optional(),
 });
@@ -155,6 +158,7 @@ tool(
     description: z.string().optional(),
     priority: priority.optional(),
     status: reqStatus.optional(),
+    type: reqType.optional(),
     implemented: z.union([z.literal(0), z.literal(1)]).optional(),
     epic_id: z.union([z.number(), z.null()]).optional(),
   },
